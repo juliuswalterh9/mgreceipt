@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 화면</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f5f7fb;
+        color: #222;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e6e9f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h1, h2 {
+        margin: 0 0 12px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      input, button {
+        height: 36px;
+        padding: 0 10px;
+      }
+      input {
+        border: 1px solid #cfd5e3;
+        border-radius: 8px;
+      }
+      button {
+        border: 0;
+        background: #1d4ed8;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #4b5563;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .tab-btn {
+        background: #e5e7eb;
+        color: #111827;
+      }
+      .tab-btn.active {
+        background: #1d4ed8;
+        color: #fff;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border-bottom: 1px solid #eceff5;
+        padding: 8px;
+        font-size: 14px;
+        text-align: left;
+      }
+      #message {
+        margin-top: 8px;
+        color: #b91c1c;
+        white-space: pre-wrap;
+      }
+      .hidden {
+        display: none;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>관리자 화면</h1>
+
+      <div class="card" id="loginCard">
+        <h2>관리자 로그인</h2>
+        <div class="row">
+          <input id="userId" placeholder="아이디(user_id)" />
+          <input id="password" type="password" placeholder="비밀번호" />
+          <button id="loginBtn">로그인</button>
+        </div>
+        <div id="message"></div>
+      </div>
+
+      <div class="card hidden" id="adminCard">
+        <div class="row" style="justify-content: space-between">
+          <h2>관리자 대시보드</h2>
+          <button class="secondary" id="logoutBtn">로그아웃</button>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn" id="usersTabBtn">사용자 목록</button>
+          <button class="tab-btn active" id="receiptsTabBtn">영수증 목록</button>
+          <button class="tab-btn" id="processedTabBtn">처리 목록</button>
+        </div>
+        <div class="tab-panel" id="usersPanel">
+          <h2>사용자 목록</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>아이디</th>
+                <th>이름</th>
+                <th>부서</th>
+                <th>권한</th>
+                <th>활성</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+
+        <div class="tab-panel active" id="receiptsPanel">
+          <h2>영수증 목록</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>승인일시</th>
+                <th>사용자</th>
+                <th>부서</th>
+                <th>사용처</th>
+                <th>승인금액</th>
+                <th>카드번호</th>
+                <th>영수증 다운</th>
+                <th>확인</th>
+              </tr>
+            </thead>
+            <tbody id="receiptsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="tab-panel" id="processedPanel">
+          <h2>처리 목록</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>승인일시</th>
+                <th>사용자</th>
+                <th>부서</th>
+                <th>사용처</th>
+                <th>승인금액</th>
+                <th>카드번호</th>
+                <th>처리일시</th>
+                <th>영수증 다운</th>
+              </tr>
+            </thead>
+            <tbody id="processedBody"></tbody>
+          </table>
+        </div>
+        <div id="adminMessage" style="margin-top: 12px"></div>
+      </div>
+    </div>
+    <script src="/admin.js"></script>
+  </body>
+  </html>

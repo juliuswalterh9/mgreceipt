@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1d4ed8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>영수증 제출</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
+        color: #0f172a;
+        background: #eef2ff;
+        min-height: 100dvh;
+        padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+          max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.35rem;
+      }
+      .title-row {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+      .version-text {
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+      .sub {
+        margin: 0 0 16px;
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="datetime-local"],
+      input[type="number"] {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 1rem;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      .preview-wrap {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f1f5f9;
+        min-height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .preview-wrap img {
+        width: 100%;
+        max-height: 280px;
+        object-fit: contain;
+        display: block;
+      }
+      .preview-placeholder {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        padding: 24px;
+        text-align: center;
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        padding: 0 16px;
+        border: none;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      .btn-primary {
+        background: #1d4ed8;
+        color: #fff;
+      }
+      .btn-primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #1e293b;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: #64748b;
+        min-height: 44px;
+        font-weight: 500;
+      }
+      .file-input {
+        position: absolute;
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      .msg {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+      }
+      .msg.error {
+        background: #fef2f2;
+        color: #b91c1c;
+      }
+      .msg.ok {
+        background: #ecfdf5;
+        color: #047857;
+      }
+      .msg.info {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .row-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title-row">
+      <h1>영수증 제출</h1>
+      <span id="appVersion" class="version-text"></span>
+    </div>
+    <p class="sub">
+      촬영 또는 앨범 선택 직후 OCR로 필드가 자동 채워집니다. 내용을 확인·수정한 뒤 저장하세요.
+    </p>
+
+    <div class="card" id="loginCard">
+      <label for="userId">아이디</label>
+      <div class="field">
+        <input id="userId" type="text" autocomplete="username" inputmode="text" />
+      </div>
+      <label for="password">비밀번호</label>
+      <div class="field">
+        <input id="password" type="password" autocomplete="current-password" />
+      </div>
+      <button type="button" class="btn btn-primary" id="loginBtn">로그인</button>
+      <div id="loginMsg"></div>
+    </div>
+
+    <div class="card hidden" id="mainCard">
+      <p style="margin: 0 0 12px; font-size: 0.9rem; color: #64748b">
+        <span id="userLabel"></span>
+        <button type="button" class="btn btn-ghost" id="logoutBtn" style="margin: 0; width: auto; display: inline">
+          로그아웃
+        </button>
+      </p>
+
+      <label>영수증 이미지</label>
+      <div class="preview-wrap" id="previewWrap">
+        <span class="preview-placeholder" id="previewPlaceholder">이미지를 선택해 주세요</span>
+        <img id="previewImg" class="hidden" alt="미리보기" />
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn btn-secondary" id="pickCameraBtn">카메라로 촬영</button>
+        <button type="button" class="btn btn-secondary" id="pickGalleryBtn">앨범에서 선택</button>
+      </div>
+      <input type="file" id="fileCamera" class="file-input" accept="image/*" capture="environment" />
+      <input type="file" id="fileGallery" class="file-input" accept="image/jpeg,image/png,image/heic" />
+
+      <div class="field" style="margin-top: 18px">
+        <label for="approvedAt">승인 일시</label>
+        <input id="approvedAt" type="datetime-local" />
+      </div>
+      <div class="field">
+        <label for="cardNumber">카드번호 (마스킹 가능)</label>
+        <input id="cardNumber" type="text" inputmode="numeric" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="amount">승인 금액 (원)</label>
+        <input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="예: 15000" />
+      </div>
+      <div class="field">
+        <label for="storeName">사용처(매장명)</label>
+        <input id="storeName" type="text" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="businessRegNo">사업자번호 (선택)</label>
+        <input id="businessRegNo" type="text" inputmode="numeric" autocomplete="off" />
+      </div>
+
+      <button type="button" class="btn btn-secondary" id="ocrBtn">OCR 다시 실행</button>
+      <button type="button" class="btn btn-primary" id="submitBtn" disabled>저장하기</button>
+      <div id="mainMsg"></div>
+    </div>
+
+    <script src="/receipt.js"></script>
+  </body>
+</html>
