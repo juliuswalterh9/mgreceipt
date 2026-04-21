@@ -12,7 +12,7 @@
         color: #222;
       }
       .wrap {
-        max-width: 1100px;
+        max-width: 1320px;
         margin: 24px auto;
         padding: 0 16px;
       }
@@ -41,13 +41,36 @@
       }
       button {
         border: 0;
-        background: #1d4ed8;
+        background: #4168c4;
         color: #fff;
         border-radius: 8px;
         cursor: pointer;
       }
       button.secondary {
         background: #4b5563;
+      }
+      button.danger {
+        background: #c73b2e;
+        color: #fff;
+      }
+      button.danger:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+      .receipts-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .receipts-toolbar h2 {
+        margin: 0;
+      }
+      #usersNameFilter {
+        min-width: 200px;
+        max-width: 100%;
       }
       .tabs {
         display: flex;
@@ -59,18 +82,149 @@
         color: #111827;
       }
       .tab-btn.active {
-        background: #1d4ed8;
+        background: #4168c4;
         color: #fff;
       }
       table {
         width: 100%;
         border-collapse: collapse;
       }
-      th, td {
+      table.receipts-table {
+        table-layout: fixed;
+        width: 100%;
+      }
+      table.users-table {
+        table-layout: fixed;
+        width: 100%;
+      }
+      table.users-table th,
+      table.users-table td {
+        border-bottom: 1px solid #eceff5;
+        padding: 8px;
+        font-size: 13px;
+        text-align: left;
+        vertical-align: middle;
+      }
+      table.users-table th {
+        text-align: center;
+      }
+      table.users-table td {
+        text-align: center;
+      }
+      table.receipts-table th,
+      table.receipts-table td {
         border-bottom: 1px solid #eceff5;
         padding: 8px;
         font-size: 14px;
         text-align: left;
+        vertical-align: middle;
+      }
+      table.receipts-table th {
+        text-align: center;
+      }
+      /* 공통 열 비율: 내용 길이에 맞춰 가독성 조정 */
+      table.receipts-table .col-date {
+        width: 11%;
+      }
+      table.receipts-table .col-user {
+        width: 5%;
+        text-align: center;
+      }
+      table.receipts-table .col-dept {
+        width: 6%;
+        text-align: center;
+      }
+      table.receipts-table .col-store {
+        width: 15%;
+      }
+      table.receipts-table .col-amount {
+        width: 5%;
+        text-align: right;
+      }
+      table.receipts-table .col-card {
+        width: 14%;
+      }
+      table.receipts-table .col-account {
+        width: 6%;
+        text-align: center;
+      }
+      table.receipts-table .td-user,
+      table.receipts-table .td-dept,
+      table.receipts-table .td-account {
+        text-align: center;
+      }
+      table.receipts-table .col-companion {
+        width: 15%;
+      }
+      table.receipts-table .td-date,
+      table.receipts-table .td-processed {
+        white-space: nowrap;
+      }
+      /* 사용처: 열 너비 유지 + 길면 아래로 줄바꿈 (동반자와 동일) */
+      table.receipts-table .td-store {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+        line-height: 1.35;
+      }
+      table.receipts-table .td-amount {
+        text-align: right;
+        white-space: nowrap;
+      }
+      table.receipts-table .td-card {
+        word-break: break-all;
+      }
+      /* 동반자만: 열 너비 유지 + 길면 아래로 줄바꿈 */
+      table.receipts-table .td-companion {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+        line-height: 1.35;
+      }
+      table.receipts-table .col-processed {
+        width: 10%;
+      }
+      table.receipts-table .col-select {
+        width: 44px;
+        text-align: center;
+      }
+      table.receipts-table .td-select {
+        text-align: center;
+        vertical-align: middle;
+      }
+      table.receipts-pending .col-action {
+        width: 6.5%;
+      }
+      table.receipts-pending .col-action + .col-action {
+        width: 6.5%;
+      }
+      table.receipts-processed .col-action {
+        width: 7%;
+      }
+      table.receipts-table .td-action {
+        text-align: center;
+        white-space: nowrap;
+      }
+      button.btn-receipt-dl,
+      button.btn-receipt-confirm {
+        display: inline-block;
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
+        height: 30px;
+        padding: 0 6px;
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: nowrap;
+        box-sizing: border-box;
+      }
+      button.btn-user-pw {
+        height: 30px;
+        padding: 0 10px;
+        font-size: 12px;
+        white-space: nowrap;
       }
       #message {
         margin-top: 8px;
@@ -113,16 +267,25 @@
           <button class="tab-btn" id="processedTabBtn">처리 목록</button>
         </div>
         <div class="tab-panel" id="usersPanel">
-          <h2>사용자 목록</h2>
-          <table>
+          <div class="receipts-toolbar">
+            <h2>사용자 목록</h2>
+            <input
+              type="search"
+              id="usersNameFilter"
+              placeholder="이름으로 필터"
+              aria-label="이름으로 필터"
+              autocomplete="off"
+            />
+          </div>
+          <table class="users-table">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>아이디</th>
                 <th>이름</th>
                 <th>부서</th>
                 <th>권한</th>
                 <th>활성</th>
+                <th>비밀번호 변경</th>
               </tr>
             </thead>
             <tbody id="usersBody"></tbody>
@@ -130,18 +293,28 @@
         </div>
 
         <div class="tab-panel active" id="receiptsPanel">
-          <h2>영수증 목록</h2>
-          <table>
+          <div class="receipts-toolbar">
+            <h2>영수증 목록</h2>
+            <button type="button" class="danger" id="bulkDeleteReceiptsBtn">
+              체크된 영수증(일괄) 삭제
+            </button>
+          </div>
+          <table class="receipts-table receipts-pending">
             <thead>
               <tr>
-                <th>승인일시</th>
-                <th>사용자</th>
-                <th>부서</th>
-                <th>사용처</th>
-                <th>승인금액</th>
-                <th>카드번호</th>
-                <th>영수증 다운</th>
-                <th>확인</th>
+                <th class="col-select">
+                  <input type="checkbox" id="receiptsSelectAll" title="전체 선택" aria-label="전체 선택" />
+                </th>
+                <th class="col-date">승인일시</th>
+                <th class="col-user">사용자</th>
+                <th class="col-dept">부서</th>
+                <th class="col-store">사용처</th>
+                <th class="col-amount">승인금액</th>
+                <th class="col-card">카드번호</th>
+                <th class="col-account">계정과목</th>
+                <th class="col-companion">동반자</th>
+                <th class="col-action">영수증 다운</th>
+                <th class="col-action">확인</th>
               </tr>
             </thead>
             <tbody id="receiptsBody"></tbody>
@@ -150,17 +323,19 @@
 
         <div class="tab-panel" id="processedPanel">
           <h2>처리 목록</h2>
-          <table>
+          <table class="receipts-table receipts-processed">
             <thead>
               <tr>
-                <th>승인일시</th>
-                <th>사용자</th>
-                <th>부서</th>
-                <th>사용처</th>
-                <th>승인금액</th>
-                <th>카드번호</th>
-                <th>처리일시</th>
-                <th>영수증 다운</th>
+                <th class="col-date">승인일시</th>
+                <th class="col-user">사용자</th>
+                <th class="col-dept">부서</th>
+                <th class="col-store">사용처</th>
+                <th class="col-amount">승인금액</th>
+                <th class="col-card">카드번호</th>
+                <th class="col-account">계정과목</th>
+                <th class="col-companion">동반자</th>
+                <th class="col-processed">처리일시</th>
+                <th class="col-action">영수증 다운</th>
               </tr>
             </thead>
             <tbody id="processedBody"></tbody>

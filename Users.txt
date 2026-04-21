@@ -1,0 +1,11 @@
+# 사용자
+(user / admin)
+role / id / passwd / username / dept / phone / email / position
+
+role / id / passwd / username / dept
+user / 김선빈 / mg1234! / 김선빈 / 기획실
+
+
+role / id / passwd / username / dept
+admin / mginfo / mg1234! / 관리자 / 기획실
+

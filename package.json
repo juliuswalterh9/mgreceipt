@@ -1,6 +1,6 @@
 {
   "name": "receipt_workspace",
-  "version": "1.2.0",
+  "version": "1.7.0",
   "description": "`process.txt`와 `법인카드_영수증_디지털화_절차서.docx` 기준으로 초기 백엔드 골격을 구성했습니다.",
   "type": "module",
   "main": "src/app.js",
@@ -9,7 +9,8 @@
     "start": "node src/app.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "seed:amc-users": "node prisma/insert-amc-users.js"
   },
   "keywords": [],
   "author": "",

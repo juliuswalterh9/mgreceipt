@@ -33,6 +33,8 @@ model Receipt {
   cardNumber       String    @map("card_number") @db.VarChar(20)
   amount           BigInt
   businessRegNo    String?   @map("business_reg_no") @db.VarChar(12)
+  companion        String?   @db.VarChar(36)
+  accountSubject   String    @default("기타") @map("account_subject") @db.VarChar(30)
   storeName        String    @map("store_name") @db.VarChar(200)
   filePath         String    @map("file_path") @db.VarChar(500)
   originalFilename String    @map("original_filename") @db.VarChar(255)

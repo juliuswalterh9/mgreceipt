@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#1d4ed8" />
+    <meta name="theme-color" content="#4168c4" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>영수증 제출</title>
     <style>
@@ -75,6 +75,26 @@
       .field {
         margin-bottom: 14px;
       }
+      .radio-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 18px;
+        align-items: center;
+        min-height: 48px;
+      }
+      .radio-row label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .radio-row input[type="radio"] {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+      }
       .preview-wrap {
         border-radius: 12px;
         overflow: hidden;
@@ -111,7 +131,7 @@
         margin-bottom: 10px;
       }
       .btn-primary {
-        background: #1d4ed8;
+        background: #4168c4;
         color: #fff;
       }
       .btn-primary:disabled {
@@ -161,6 +181,56 @@
         gap: 10px;
         margin-top: 8px;
       }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        margin: 0 0 12px;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+      .toolbar .btn {
+        margin: 0;
+        width: auto;
+        min-height: 40px;
+        padding: 0 12px;
+        display: inline-flex;
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 50;
+      }
+      .modal-overlay.hidden {
+        display: none;
+      }
+      .modal-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.15);
+      }
+      .modal-card h2 {
+        margin: 0 0 14px;
+        font-size: 1.1rem;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .modal-actions .btn {
+        flex: 1;
+        margin: 0;
+      }
     </style>
   </head>
   <body>
@@ -186,12 +256,11 @@
     </div>
 
     <div class="card hidden" id="mainCard">
-      <p style="margin: 0 0 12px; font-size: 0.9rem; color: #64748b">
+      <div class="toolbar">
         <span id="userLabel"></span>
-        <button type="button" class="btn btn-ghost" id="logoutBtn" style="margin: 0; width: auto; display: inline">
-          로그아웃
-        </button>
-      </p>
+        <button type="button" class="btn btn-ghost" id="logoutBtn">로그아웃</button>
+        <button type="button" class="btn btn-ghost" id="changePasswordBtn">비밀번호 변경</button>
+      </div>
 
       <label>영수증 이미지</label>
       <div class="preview-wrap" id="previewWrap">
@@ -225,10 +294,45 @@
         <label for="businessRegNo">사업자번호 (선택)</label>
         <input id="businessRegNo" type="text" inputmode="numeric" autocomplete="off" />
       </div>
+      <div class="field">
+        <label id="accountSubjectLabel">계정과목</label>
+        <div class="radio-row" role="radiogroup" aria-labelledby="accountSubjectLabel">
+          <label><input type="radio" name="accountSubject" value="접대비" /> 접대비</label>
+          <label><input type="radio" name="accountSubject" value="사기진작비" /> 사기진작비</label>
+          <label><input type="radio" name="accountSubject" value="기타" checked /> 기타</label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="companion">동반자 (선택)</label>
+        <input id="companion" type="text" maxlength="36" autocomplete="off" />
+      </div>
 
       <button type="button" class="btn btn-secondary" id="ocrBtn">OCR 다시 실행</button>
       <button type="button" class="btn btn-primary" id="submitBtn" disabled>저장하기</button>
       <div id="mainMsg"></div>
+    </div>
+
+    <div id="passwordModal" class="modal-overlay hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-labelledby="passwordModalTitle">
+        <h2 id="passwordModalTitle">비밀번호 변경</h2>
+        <div class="field" style="margin-bottom: 12px">
+          <label for="currentPassword">현재 비밀번호</label>
+          <input id="currentPassword" type="password" autocomplete="current-password" />
+        </div>
+        <div class="field" style="margin-bottom: 12px">
+          <label for="newPassword">새 비밀번호 (4자 이상)</label>
+          <input id="newPassword" type="password" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label for="newPasswordConfirm">새 비밀번호 확인</label>
+          <input id="newPasswordConfirm" type="password" autocomplete="new-password" />
+        </div>
+        <div id="passwordModalMsg"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="passwordModalCancel">취소</button>
+          <button type="button" class="btn btn-primary" id="passwordModalSave">변경</button>
+        </div>
+      </div>
     </div>
 
     <script src="/receipt.js"></script>

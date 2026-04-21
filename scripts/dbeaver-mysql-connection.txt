@@ -1,0 +1,33 @@
+# DBeaver에서 MySQL(receipt_db) 접속 — 다른 PC(클라이언트 IP 예: 10.14.100.70)
+
+## 1) 서버 쪽 ACL (이미 적용됨)
+- MySQL 서버에서 클라이언트 IP가 10.14.100.70 이면 계정은
+  receipt_user@'10.14.100.70' 형태여야 합니다.
+- 프로젝트에서 적용한 예시 SQL: scripts/mysql-grant-client-host.sql
+
+## 2) DBeaver 연결 정보
+- Host: **MySQL이 설치된 서버의 IP 또는 호스트명** (DBeaver를 켠 PC가 10.14.100.70이어도,
+  여기 적는 주소는 **DB 서버**입니다.)
+- Port: 3306
+- Database: receipt_db
+- Username: receipt_user
+- Password: (본인 .env 의 DATABASE_URL 과 동일)
+
+## 3) "Public Key Retrieval is not allowed" 해결 (필수)
+
+방법 A — 드라이버 속성 (권장)
+1) 연결 편집 → Driver properties (또는 "Driver settings" → "Properties")
+2) 사용자 속성 추가:
+   - Name: allowPublicKeyRetrieval
+   - Value: true
+
+방법 B — JDBC URL에 직접 포함
+1) 연결 편집 → Main → URL (또는 "Use URL" 체크)
+2) 예시:
+   jdbc:mysql://DB서버주소:3306/receipt_db?allowPublicKeyRetrieval=true
+
+(SSL 사용 시 &useSSL=true 등 추가)
+
+## 4) 여전히 안 되면
+- DB 서버 방화벽에서 3306/tcp 허용 여부
+- MySQL이 0.0.0.0:3306 에 바인딩되어 있는지 (ss -lntp | grep 3306)

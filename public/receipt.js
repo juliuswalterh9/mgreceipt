@@ -1,6 +1,6 @@
 const TOKEN_KEY = "receipt_access_token";
 /** /health 실패 시 표시 (package.json 과 맞출 것) */
-const APP_VERSION_FALLBACK = "v1.2.0";
+const APP_VERSION_FALLBACK = "v1.5.0";
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,7 +12,15 @@ const els = {
   loginBtn: $("loginBtn"),
   loginMsg: $("loginMsg"),
   logoutBtn: $("logoutBtn"),
+  changePasswordBtn: $("changePasswordBtn"),
   userLabel: $("userLabel"),
+  passwordModal: $("passwordModal"),
+  currentPassword: $("currentPassword"),
+  newPassword: $("newPassword"),
+  newPasswordConfirm: $("newPasswordConfirm"),
+  passwordModalMsg: $("passwordModalMsg"),
+  passwordModalCancel: $("passwordModalCancel"),
+  passwordModalSave: $("passwordModalSave"),
   previewImg: $("previewImg"),
   previewPlaceholder: $("previewPlaceholder"),
   fileCamera: $("fileCamera"),
@@ -24,6 +32,7 @@ const els = {
   amount: $("amount"),
   storeName: $("storeName"),
   businessRegNo: $("businessRegNo"),
+  companion: $("companion"),
   appVersion: $("appVersion"),
   ocrBtn: $("ocrBtn"),
   submitBtn: $("submitBtn"),
@@ -90,6 +99,18 @@ function setPreview(file) {
 }
 
 /** 저장 후 또는 초기화: 입력·파일·미리보기 리셋 (로그인 상태 유지) */
+function getSelectedAccountSubject() {
+  const el = document.querySelector('input[name="accountSubject"]:checked');
+  return el?.value ?? "기타";
+}
+
+function resetAccountSubjectRadios() {
+  const radios = document.querySelectorAll('input[name="accountSubject"]');
+  for (const r of radios) {
+    r.checked = r.value === "기타";
+  }
+}
+
 function resetReceiptForm() {
   selectedFile = null;
   if (els.fileCamera) els.fileCamera.value = "";
@@ -100,6 +121,8 @@ function resetReceiptForm() {
   els.amount.value = "";
   els.storeName.value = "";
   els.businessRegNo.value = "";
+  resetAccountSubjectRadios();
+  els.companion.value = "";
   els.ocrBtn.disabled = false;
   els.submitBtn.disabled = true;
 }
@@ -157,9 +180,58 @@ async function logout() {
   clearToken();
   selectedFile = null;
   setPreview(null);
+  closePasswordModal();
   els.mainCard.classList.add("hidden");
   els.loginCard.classList.remove("hidden");
   showMsg(els.loginMsg, "로그아웃했습니다.", "ok");
+}
+
+function openPasswordModal() {
+  els.currentPassword.value = "";
+  els.newPassword.value = "";
+  els.newPasswordConfirm.value = "";
+  showMsg(els.passwordModalMsg, "");
+  els.passwordModal.classList.remove("hidden");
+  els.passwordModal.setAttribute("aria-hidden", "false");
+}
+
+function closePasswordModal() {
+  els.passwordModal.classList.add("hidden");
+  els.passwordModal.setAttribute("aria-hidden", "true");
+}
+
+async function submitPasswordChange() {
+  showMsg(els.passwordModalMsg, "");
+  const cur = els.currentPassword.value;
+  const np = els.newPassword.value;
+  const npc = els.newPasswordConfirm.value;
+  if (!cur || !np) {
+    showMsg(els.passwordModalMsg, "현재 비밀번호와 새 비밀번호를 입력하세요.", "err");
+    return;
+  }
+  if (np.length < 4) {
+    showMsg(els.passwordModalMsg, "새 비밀번호는 4자 이상이어야 합니다.", "err");
+    return;
+  }
+  if (np !== npc) {
+    showMsg(els.passwordModalMsg, "새 비밀번호 확인이 일치하지 않습니다.", "err");
+    return;
+  }
+  els.passwordModalSave.disabled = true;
+  try {
+    await apiFetch("/api/auth/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: cur, newPassword: np }),
+    });
+    showMsg(els.passwordModalMsg, "비밀번호가 변경되었습니다.", "ok");
+    closePasswordModal();
+    showMsg(els.mainMsg, "비밀번호가 변경되었습니다.", "ok");
+  } catch (e) {
+    showMsg(els.passwordModalMsg, e.message || "변경 실패", "err");
+  } finally {
+    els.passwordModalSave.disabled = false;
+  }
 }
 
 async function runOcrInternal({ successMessage } = {}) {
@@ -223,6 +295,9 @@ async function submit() {
   fd.append("storeName", els.storeName.value.trim());
   const br = els.businessRegNo.value.trim();
   if (br) fd.append("businessRegNo", br);
+  const companion = els.companion.value.trim();
+  if (companion) fd.append("companion", companion.slice(0, 36));
+  fd.append("accountSubject", getSelectedAccountSubject());
 
   if (!els.approvedAt.value || !els.cardNumber.value.trim() || !els.amount.value.trim() || !els.storeName.value.trim()) {
     showMsg(els.mainMsg, "승인일시, 카드번호, 금액, 매장명을 모두 입력해 주세요.", "err");
@@ -275,6 +350,12 @@ function init() {
 
   els.loginBtn.addEventListener("click", login);
   els.logoutBtn.addEventListener("click", logout);
+  els.changePasswordBtn.addEventListener("click", openPasswordModal);
+  els.passwordModalCancel.addEventListener("click", closePasswordModal);
+  els.passwordModalSave.addEventListener("click", () => void submitPasswordChange());
+  els.passwordModal.addEventListener("click", (e) => {
+    if (e.target === els.passwordModal) closePasswordModal();
+  });
   els.ocrBtn.addEventListener("click", runOcr);
   els.submitBtn.addEventListener("click", submit);
 

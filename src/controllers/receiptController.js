@@ -6,6 +6,14 @@ import { toSafeJson } from "../utils/serializer.js";
 
 const UPLOAD_ROOT = path.resolve(process.cwd(), "uploads", "receipts");
 
+/** 사용자 선택 계정과목 (라디오 값과 동일) */
+const ACCOUNT_SUBJECT_VALUES = ["접대비", "사기진작비", "기타"];
+
+function normalizeAccountSubject(raw) {
+  const v = String(raw ?? "").trim();
+  return ACCOUNT_SUBJECT_VALUES.includes(v) ? v : "기타";
+}
+
 function sanitizeFileToken(value) {
   return String(value ?? "")
     .trim()
@@ -78,6 +86,14 @@ export async function submitReceipt(req, res) {
   const amount = req.body.amount != null && req.body.amount !== "" ? req.body.amount : String(parsed.amount);
   const storeName = req.body.storeName ?? parsed.storeName;
   const businessRegNo = req.body.businessRegNo ?? parsed.businessRegNo ?? null;
+  const companionRaw = req.body.companion;
+  const companion =
+    companionRaw != null && String(companionRaw).trim() !== ""
+      ? String(companionRaw).trim().slice(0, 36)
+      : null;
+  const accountSubject = normalizeAccountSubject(
+    req.body.accountSubject ?? req.body.account_subject
+  );
 
   if (!approvedAt || !cardNumber || !amount || !storeName) {
     return res.status(400).json({
@@ -130,6 +146,8 @@ export async function submitReceipt(req, res) {
       cardNumber,
       amount: amountBig,
       businessRegNo,
+      companion,
+      accountSubject,
       storeName,
       filePath,
       originalFilename: finalFilename,
@@ -145,6 +163,8 @@ export async function submitReceipt(req, res) {
           amount: parsed.amount,
           storeName: parsed.storeName,
           businessRegNo: parsed.businessRegNo,
+          companion,
+          accountSubject,
         },
       },
     },
@@ -169,6 +189,11 @@ export async function createReceipt(req, res) {
       cardNumber: payload.cardNumber,
       amount: BigInt(payload.amount),
       businessRegNo: payload.businessRegNo ?? null,
+      companion:
+        payload.companion != null && String(payload.companion).trim() !== ""
+          ? String(payload.companion).trim().slice(0, 36)
+          : null,
+      accountSubject: normalizeAccountSubject(payload.accountSubject ?? payload.account_subject),
       storeName: payload.storeName,
       filePath: payload.filePath,
       originalFilename: payload.originalFilename,

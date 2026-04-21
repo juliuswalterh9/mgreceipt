@@ -134,3 +134,60 @@ export function logout(req, res) {
 export function me(req, res) {
   return res.json({ success: true, data: toSafeJson(req.user), message: "조회 성공" });
 }
+
+/** 로그인 사용자 본인 비밀번호 변경 (DB `password_hash` 갱신) */
+export async function changePassword(req, res) {
+  const currentPassword = req.body.currentPassword ?? req.body.current_password;
+  const newPassword = req.body.newPassword ?? req.body.new_password;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      error: "VALIDATION_ERROR",
+      message: "현재 비밀번호와 새 비밀번호를 입력해 주세요.",
+    });
+  }
+  const next = String(newPassword);
+  if (next.length < 4) {
+    return res.status(400).json({
+      success: false,
+      error: "VALIDATION_ERROR",
+      message: "새 비밀번호는 4자 이상으로 설정해 주세요.",
+    });
+  }
+
+  const userId = BigInt(req.user.id);
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.isActive) {
+    return res.status(404).json({
+      success: false,
+      error: "NOT_FOUND",
+      message: "사용자를 찾을 수 없습니다.",
+    });
+  }
+
+  const ok = await bcrypt.compare(String(currentPassword), user.passwordHash);
+  if (!ok) {
+    return res.status(401).json({
+      success: false,
+      error: "INVALID_PASSWORD",
+      message: "현재 비밀번호가 올바르지 않습니다.",
+    });
+  }
+
+  const same = await bcrypt.compare(next, user.passwordHash);
+  if (same) {
+    return res.status(400).json({
+      success: false,
+      error: "VALIDATION_ERROR",
+      message: "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
+    });
+  }
+
+  const passwordHash = await bcrypt.hash(next, 12);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
+
+  return res.json({ success: true, message: "비밀번호가 변경되었습니다." });
+}
